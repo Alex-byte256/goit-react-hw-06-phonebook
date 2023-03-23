@@ -2,41 +2,16 @@ import ContactForm from './PhoneBook/ContactForm ';
 import { nanoid } from 'nanoid'
 import Filter from './PhoneBook/Filter/Filter';
 import ContactList from './ContactList/ContactList';
-import { useEffect, useRef, useState } from 'react';
+import { useSelector , useDispatch } from 'react-redux';
+import {addContact ,removeContact, updateFilter} from '../redux/store'
 
 
 
 function  App (){
-  const [contacts, setContacts] = useState([]);
-  const [filter, setFilter] = useState("");
+  const dispatch = useDispatch();
+  const contacts = useSelector(state => state.contacts.contacts)
+  const filter = useSelector(state => state.contacts.filter)
 
-  useEffect(()=>{
-    const contacts = localStorage.getItem('contacts');
-    const parsedContacts = JSON.parse(contacts);
-
-    if(parsedContacts){
-      setContacts(parsedContacts);
-    }
-  },[]);
-
-  const start = useRef(0);
-
-  useEffect(()=>{
-    if (start.current === 0){
-      start.current = 1;
-      return;
-    }
-    localStorage.setItem("contacts",JSON.stringify(contacts))
-  },[contacts])
-
-
-  // componentDidUpdate(prevProps, prevState) {
-  //
-  //   if(this.state.contacts !== prevState.contacts){
-  //     localStorage.setItem("contacts",JSON.stringify(this.state.contacts))
-  //   }
-  //
-  // }
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -45,24 +20,20 @@ function  App (){
       alert("Контакт з таким іменем уже присутній")
       return;
     }
-    setContacts(
-      [...contacts,
-        { name:event.target.name.value,number:event.target.number.value, id: nanoid(10) }
-      ]);
-
+    dispatch(addContact(
+      { name:event.target.name.value,number:event.target.number.value, id: nanoid(10) }
+    ))
   }
 
   const changeFilter = (e) => {
-    setFilter(e.currentTarget.value)
+    dispatch(updateFilter(e.target.value))
   }
 
   const deleteContact = (contactId) => {
-      setContacts(prevState =>(
-        prevState.filter(el => el.id !== contactId)
-      ))
+    dispatch(removeContact(contactId))
   }
 
-
+  console.log(contacts)
 
 
     const normalizedFilter = filter.toLowerCase();
